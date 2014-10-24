@@ -11,21 +11,28 @@ function [params] = find_params(t,f)
     %params(i,16) -> complexity
     %params(i,17) -> AR model fit
     params = zeros(size(t,2),21);
-    EPSILON = 0.01;
+    der = zeros(length(t)-1, size(t,2));
+    dbder = zeros(length(t)-2, size(t,2));
+    EPSILON = 0.01; %for maxima minima |f'(x)| < EPSILON instead of = 0
     for i=1:size(t,2) %time domain features
         for j=1:length(t)
             params(i,11) = params(i,11) + t(j,i)*t(j,i);
             if j~=(length(t))
-                params(i,9) = params(i,9) + abs(t(j+1,i)-t(j,i));
-                params(i,12) = params(i,12) + (abs(t(j+1,i)-t(j,i))<EPSILON);
+                der(j,i) = t(j+1,i)-t(j,i);
+                params(i,9) = params(i,9) + abs(der(j,i));
+                params(i,12) = params(i,12) + (abs(der(j,i))<EPSILON);
                 params(i,13) = params(i,13) + (t(j+1)*t(j) < 0);
                 if j~=1
                     params(i,10) = params(i,10) + (t(j,i)*t(j,i) - t(j-1,i)*t(j+1,i));
+                    dbder(j-1,i) = der(j,i)-der(j-1,i);
                 end
             end
         end
         params(i,10) = params(i,10) / (length(t)-2);
         params(i,11) = sqrt(params(i,11) / length(t));
+        params(i,14) = var(t(:,i));
+        params(i,15) = std(der(:,i))/std(t(:,i));
+        params(i,16) = (std(dbder(:,i))/std(der(:,i)))/(std(der(:,i))/std(t(:,i)));
     end
     for i=1:size(f,2) % frequency domain features
         psd = periodogram(t(:,i),rectwin(length(t)),length(t),length(t));
