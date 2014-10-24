@@ -29,4 +29,4 @@ for i=1:size(datat,2)
 end
 
 clearvars -except down filtered; %all further analysis will take place wrt filtered or downsampled data (freq and time domain respectively)
-parameters = find_param(down, filtered);
+parameters = find_params(down, filtered);
