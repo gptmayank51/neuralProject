@@ -6,6 +6,10 @@ function [params] = find_params(t,f)
     %params(i,11) -> RMS amplitude
     %params(i,12) -> number of maxima and minima
     %params(i,13) -> number of zero crossings
+    %params(i,14) -> activity
+    %params(i,15) -> mobility
+    %params(i,16) -> complexity
+    %params(i,17) -> AR model fit
     params = zeros(size(t,2),21);
     EPSILON = 0.01;
     for i=1:size(t,2) %time domain features
@@ -14,6 +18,7 @@ function [params] = find_params(t,f)
             if j~=(length(t))
                 params(i,9) = params(i,9) + abs(t(j+1,i)-t(j,i));
                 params(i,12) = params(i,12) + (abs(t(j+1,i)-t(j,i))<EPSILON);
+                params(i,13) = params(i,13) + (t(j+1)*t(j) < 0);
                 if j~=1
                     params(i,10) = params(i,10) + (t(j,i)*t(j,i) - t(j-1,i)*t(j+1,i));
                 end
