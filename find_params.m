@@ -1,6 +1,12 @@
 function [params] = find_params(t,f)
     %params(i,1) -> peak frequency
     %params(i,2) -> bandwidth
+    %params(i,3) -> peak power
+    %params(i,4) -> spectral edge frequency
+    %params(i,5) -> total spectral power
+    %params(i,6) -> intensity weighted mean frequency
+    %params(i,7) -> intensity weighted bandwidth
+    %params(i,8) -> wavelet energy
     %params(i,9) -> line length
     %params(i,10) -> mean non linear energy
     %params(i,11) -> RMS amplitude
@@ -18,6 +24,7 @@ function [params] = find_params(t,f)
     der = zeros(length(t)-1, size(t,2));
     dbder = zeros(length(t)-2, size(t,2));
     EPSILON = 0.01; %for maxima minima |f'(x)| < EPSILON instead of = 0
+    DE = 20; %embedded Dimension
     for i=1:size(t,2) %time domain features
         for j=1:length(t)
             params(i,11) = params(i,11) + t(j,i)*t(j,i);
@@ -41,12 +48,13 @@ function [params] = find_params(t,f)
         [~, params(i,17)] = compare(t(length(t)/2+1:end,i),m);
     end
     for i=1:size(f,2) % frequency domain features
-        psd = periodogram(t(:,i),rectwin(length(t)),length(f),length(t));
-        maxi = -Inf;
-        for j=1:length(f)
-            maxi = max(maxi,f(j,i));
-        end
-        params(i,1) = maxi;
+        xdft = fft(t(:,i));
+        xdft = xdft(1:length(t(:,i))/2+1);
+        psdx = (1/(length(f(:,i))*length(t(:,i)))) * abs(xdft).^2;
+        psdx(2:end-1) = 2*psdx(2:end-1);
+        params(i,1) = max(f(:,i));
+        params(i,3) = max(psdx);
+        params(i,5) = sum(psdx);
     end
     for i=1:size(t,2) % entropy domain features
         xdft = fft(t(:,i));
@@ -58,5 +66,14 @@ function [params] = find_params(t,f)
         params(i,18) = (-1/log(Nf))*sum(pfx.*log(pfx));
         [~, phx, ~] = kde(t(:,i));
         params(i,19) = -sum(phx.*log(phx));
-        params(i,20) = ApEn(20, 0.2*std(t(:,i)), t(:,i));
+        params(i,20) = ApEn(DE, 0.2*std(t(:,i)), t(:,i));
+        X = zeros(ceil(length(t)/DE),DE);
+        for j=1:length(X)
+            for k=1:DE
+                X(j,k) = t(j+k,i);
+            end
+        end
+        Si = svd(X);
+        Sjbar = Si/sum(Si);
+        params(i,21) = sum(Sjbar.*log(Sjbar));
     end
