@@ -35,10 +35,10 @@ function [params] = find_params(t,f)
         params(i,15) = std(der(:,i))/std(t(:,i));
         params(i,16) = (std(dbder(:,i))/std(der(:,i)))/(std(der(:,i))/std(t(:,i)));
         m = ar(t(1:length(t)/2,i),7);
-        [~, params(i,17)] = compare(t(length(t)/2+1:length(t),i),m);
+        [~, params(i,17)] = compare(t(length(t)/2+1:end,i),m);
     end
     for i=1:size(f,2) % frequency domain features
-        psd = periodogram(t(:,i),rectwin(length(t)),length(t),length(t));
+        psd = periodogram(t(:,i),rectwin(length(t)),length(f),length(t));
         maxi = -Inf;
         for j=1:length(f)
             maxi = max(maxi,f(j,i));
@@ -53,4 +53,6 @@ function [params] = find_params(t,f)
         pfx = psdx/sum(psdx);
         Nf = numel(unique(psdx));
         params(i,18) = (-1/log(Nf))*sum(pfx.*log(pfx));
+        [~, phx, ~] = kde(t(:,i));
+        params(i,19) = -sum(phx.*log(phx));
     end
