@@ -11,6 +11,7 @@ function [params] = find_params(t,f)
     %params(i,16) -> complexity
     %params(i,17) -> AR model fit
     %params(i,18) -> Spectral entropy
+    %params(i,19) -> Shannon entropy
     params = zeros(size(t,2),21);
     der = zeros(length(t)-1, size(t,2));
     dbder = zeros(length(t)-2, size(t,2));
