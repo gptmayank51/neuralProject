@@ -10,8 +10,10 @@ function [params] = find_params(t,f)
     %params(i,15) -> mobility
     %params(i,16) -> complexity
     %params(i,17) -> AR model fit
-    %params(i,18) -> Spectral entropy
+    %params(i,18) -> spectral entropy
     %params(i,19) -> Shannon entropy
+    %params(i,20) -> approximate entropy
+    %params(i,21) -> SVD entropy
     params = zeros(size(t,2),21);
     der = zeros(length(t)-1, size(t,2));
     dbder = zeros(length(t)-2, size(t,2));
@@ -56,4 +58,5 @@ function [params] = find_params(t,f)
         params(i,18) = (-1/log(Nf))*sum(pfx.*log(pfx));
         [~, phx, ~] = kde(t(:,i));
         params(i,19) = -sum(phx.*log(phx));
+        params(i,20) = ApEn(20, 0.2*std(t(:,i)), t(:,i));
     end
