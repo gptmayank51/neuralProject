@@ -10,6 +10,7 @@ function [params] = find_params(t,f)
     %params(i,15) -> mobility
     %params(i,16) -> complexity
     %params(i,17) -> AR model fit
+    %params(i,18) -> Spectral entropy
     params = zeros(size(t,2),21);
     der = zeros(length(t)-1, size(t,2));
     dbder = zeros(length(t)-2, size(t,2));
@@ -43,4 +44,13 @@ function [params] = find_params(t,f)
             maxi = max(maxi,f(j,i));
         end
         params(i,1) = maxi;
+    end
+    for i=1:size(t,2) % entropy domain features
+        xdft = fft(t(:,i));
+        xdft = xdft(1:length(t(:,i))/2+1);
+        psdx = (1/(length(f(:,i))*length(t(:,i)))) * abs(xdft).^2;
+        psdx(2:end-1) = 2*psdx(2:end-1);
+        pfx = psdx/sum(psdx);
+        Nf = numel(unique(psdx));
+        params(i,18) = (-1/log(Nf))*sum(pfx.*log(pfx));
     end
