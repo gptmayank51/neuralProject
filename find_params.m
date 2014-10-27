@@ -1,4 +1,4 @@
-function [params] = find_params(t,f)
+function [params] = find_params(t)
     %params(i,1) -> peak frequency
     %params(i,2) -> bandwidth
     %params(i,5) -> Total Power
@@ -22,21 +22,21 @@ function [params] = find_params(t,f)
     %params(i,20) -> approximate entropy
     %params(i,21) -> SVD entropy
 
-
     params = zeros(size(t,2),21);
-    sfrequency = 250;
+    sfrequency = length(t);
     der = zeros(length(t)-1, size(t,2));
     dbder = zeros(length(t)-2, size(t,2));
-    EPSILON = 0.01; %for maxima minima |f'(x)| < EPSILON instead of = 0
+    EPSILON = 1; %for maxima minima |f'(x)| < EPSILON instead of = 0
     DE = 20; %embedded Dimension
-    for i=1:size(t,2) %time domain features
+    for i=1:size(t,2)
+        %time domain features
         for j=1:length(t)
             params(i,11) = params(i,11) + t(j,i)*t(j,i);
             if j~=(length(t))
                 der(j,i) = t(j+1,i)-t(j,i);
                 params(i,9) = params(i,9) + abs(der(j,i));
                 params(i,12) = params(i,12) + (abs(der(j,i))<EPSILON);
-                params(i,13) = params(i,13) + (t(j+1)*t(j) < 0);
+                params(i,13) = params(i,13) + (t(j+1,i)*t(j,i) < 0);
                 if j~=1
                     params(i,10) = params(i,10) + (t(j,i)*t(j,i) - t(j-1,i)*t(j+1,i));
                     dbder(j-1,i) = der(j,i)-der(j-1,i);
@@ -50,13 +50,12 @@ function [params] = find_params(t,f)
         params(i,16) = (std(dbder(:,i))/std(der(:,i)))/(std(der(:,i))/std(t(:,i)));
         m = ar(t(1:length(t)/2,i),7);
         [~, params(i,17)] = compare(t(length(t)/2+1:end,i),m);
-    end
-
-    for i=1:size(f,2) % frequency domain features
+        
+        %frequency domain features
         %hold on;
         [pxx,~] = periodogram(t(:,i),[],length(t(:,i)),sfrequency); %512 point fft LINK - http://www.mathworks.in/help/signal/ref/periodogram.html#btt5utg
         % pxx is  periodogram power spectral density (PSD) estimate
-        %plot(10*log10(psd));
+        %plot(10*log10(pxx));
         [maxVal, index] = max(pxx);
         temp = abs(pxx - (maxVal/2));
         [~,Ind]= sort(temp);
@@ -85,22 +84,14 @@ function [params] = find_params(t,f)
         iwbw = sqrt(sum(psubi.*((iwmf - ivector*df)'*(iwmf - ivector*df)))/sum(psubi));
         params(i,7) = iwbw;
         [C,L] = wavedec(t(:,i), 8, 'db4');
-        [Ea, ~] = wenergy(C, L);
-        params(i,8)= Ea;
+        [params(i,8), ~] = wenergy(C, L);
         
-    end
-
-
-    for i=1:size(t,2) % entropy domain features
-        xdft = fft(t(:,i));
-        xdft = xdft(1:length(t(:,i))/2+1);
-        psdx = (1/(length(f(:,i))*length(t(:,i)))) * abs(xdft).^2;
-        psdx(2:end-1) = 2*psdx(2:end-1);
-        pfx = psdx/sum(psdx);
-        Nf = numel(unique(psdx));
-        params(i,18) = (-1/log(Nf))*sum(pfx.*log(pfx));
+        %entropy domain features
+        pfx = pxx(1:30)/sum(pxx(1:30));
+        params(i,18) = (-1/log(30))*sum(pfx.*log(pfx));
         [~, phx, ~] = kde(t(:,i));
-        params(i,19) = -sum(phx.*log(phx));
+        reqd = find(phx>0);
+        params(i,19) = -sum(phx(reqd).*log(phx(reqd)));
         params(i,20) = ApEn(DE, 0.2*std(t(:,i)), t(:,i));
         X = zeros(ceil(length(t)/DE),DE);
         for j=1:length(X)
