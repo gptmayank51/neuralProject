@@ -1,7 +1,6 @@
 function [params] = find_params(t)
     %params(i,1) -> peak frequency
     %params(i,2) -> bandwidth
-    %params(i,5) -> Total Power
     %params(i,3) -> peak power
     %params(i,4) -> spectral edge frequency
     %params(i,5) -> total spectral power

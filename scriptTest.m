@@ -56,7 +56,7 @@ for i=3:size(folders,1)
 
             clearvars -except filtered optFile Y folders files i optFolder cLength; % all further analysis will take place wrt filtered data
             parameters = find_params(filtered);
-            features = (parameters(1,:)); % For now taking only data of first channel for classification
+            features = mean(parameters,1); % For now taking only data of first channel for classification
             % For general case do this - 
             % X = (parameters(:))';
             save(optFile,'features','Y');
