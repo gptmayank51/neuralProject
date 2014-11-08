@@ -41,9 +41,28 @@ disp('Starting 5 Fold Testing');
 load('../dataOutput/input.mat');
 disp('=====================================');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Yahan mera code aayega!
 
+acc = zeros(1:5);
+for j=1:5
+    
+   %Add code to randomize X
+   
+   testLower = (j-1)*size(X,1)/5 +1;
+   testUpper = (j)*size(X,1)/5;
+   
+   trainX = zeros(size(X,1) - size(X,1)/5,size(X,2));
+   trainClass = zeros(size(X,1) - size(X,1)/5,1);
+   trainX(1:testLower - 1,:) = X(1:testLower -1,:);
+   trainX(testLower:end,:) = X(testUpper+1:end,:);
+   trainClass(1:testLower - 1) = class(1:testLower -1);
+   trainClass(testLower:end) = class(testUpper+1:end);
+   
+   testX = X(testLower:testUpper,:);
+   testClass = class(testLower:testUpper);
+   svmpredict(testClass,textX,gaus);
+   acc(j) = accuracy;
+end
 
 %svmpredict(class,X,linear);
 %svmpredict(class,X,gaus);
