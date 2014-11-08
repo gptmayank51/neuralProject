@@ -1,20 +1,20 @@
 clear;
-folders = dir('../dataTest/');
-if (isequal(exist('../dataTestOutput','dir'),7))
-        rmdir('../dataTestOutput','s');
+folders = dir('../dataVal/');
+if (isequal(exist('../dataValOutput','dir'),7))
+        rmdir('../dataValOutput','s');
 end
-mkdir('../dataTestOutput');
+mkdir('../dataValOutput');
 for i=3:size(folders,1)
-    s = sprintf('../dataTest/%s', folders(i).name);
+    s = sprintf('../dataVal/%s', folders(i).name);
     files = dir(s);
     cLength = [];
-    optFolder = sprintf('../dataTestOutput/%sOutput', folders(i).name);
+    optFolder = sprintf('../dataValOutput/%sOutput', folders(i).name);
     if (isequal(exist(optFolder,'dir'),7))
         rmdir(optFolder,'s');
     end
     mkdir(optFolder);
     for j=3:size(files,1)
-        t = sprintf('../dataTest/%s/%s', folders(i).name, files(j).name);
+        t = sprintf('../dataVal/%s/%s', folders(i).name, files(j).name);
         optFile = sprintf('%s/%s.mat',optFolder,files(j).name);
         temp = textscan(files(j).name,'%s','delimiter','_');
         if (strcmp(temp{1}{3},'ictal') || strcmp(temp{1}{3},'interictal'))
