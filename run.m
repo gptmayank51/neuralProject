@@ -42,7 +42,9 @@ load('../dataOutput/input.mat');
 disp('=====================================');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Yahan mera code aayega!
-
+perm = randperm(size(X,1));
+X = X(perm,:);
+class = class(perm);
 acc = zeros(1:5);
 for j=1:5
     
