@@ -21,14 +21,50 @@ disp('Searching For gamma');
 disp('=====================================');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Enter Your code here bhale!
-
 % X contains feature vectors
 % class contains its classes
-gamma =  0.000001;
+X = (X - (ones(length(X),1)*mean(X)))./(ones(length(X),1)*std(X)); %normalised features
+%coarse grained search for c and gamma
 addpath('C:\libsvm\matlab');
+maxac = 0;
+gammamax = 0;
+cmax = 0;
+for i=-5:15
+    c = 2^i;
+    for j = -15:3
+        gamma = 2^j;
+        options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
+        gaus = svmtrain(class,X,options);
+        [~,acc,~] = svmpredict(class,X,gaus);
+        if acc > maxac
+            maxac = acc;
+            gammamax = j;
+            cmax = i;
+        end
+    end 
+end
+%fine grained search
+crange = cmax-0.5:0.01:cmax+0.5;
+gammarange = gammamax-0.5:0.01:gammamax+0.5;
+maxac = 0;
+gammamax = 0;
+cmax = 0;
+for i=1:length(crange)
+    c = 2^crange(i);
+    for j = 1:length(gammarange)
+        gamma = 2^gammarange(j);
+        options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
+        gaus = svmtrain(class,X,options);
+        [~,acc,~] = svmpredict(class,X,gaus);
+        if acc > maxac
+            maxac = acc;
+            gammamax = gamma;
+            cmax = c;
+        end
+    end 
+end
 
-
-options = sprintf('-s 0 -t 2 -c 1 -g %f', gamma);
+options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
 %linear = svmtrain(class,X,'-s 0 -t 0 -c 1');
 gaus = svmtrain(class,X,options);
 save ('model.mat','gaus');
