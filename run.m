@@ -64,7 +64,7 @@ for i=1:length(crange)
     end 
 end
 
-options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
+options = sprintf('-s 0 -t 2 -c %f -g %f', cmax, gammamax);
 %linear = svmtrain(class,X,'-s 0 -t 0 -c 1');
 gaus = svmtrain(class,X,options);
 save ('model.mat','gaus');
