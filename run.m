@@ -23,7 +23,7 @@ disp('=====================================');
 % Enter Your code here bhale!
 % X contains feature vectors
 % class contains its classes
-X = (X - (ones(length(X),1)*mean(X)))./(ones(length(X),1)*std(X)); %normalised features
+X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
 %coarse grained search for c and gamma
 addpath('C:\libsvm\matlab');
 maxac = 0;
@@ -98,8 +98,8 @@ for j=1:5
    
    testX = X(testLower:testUpper,:);
    testClass = class(testLower:testUpper);
-   svmpredict(testClass,textX,gaus);
-   acc(j) = accuracy;
+   [~, accuracy, ~] = svmpredict(testClass,testX,gaus);
+   acc(j) = accuracy(1);
 end
 
 %svmpredict(class,X,linear);
