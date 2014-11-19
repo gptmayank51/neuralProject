@@ -1,20 +1,20 @@
-disp('=====================================');
-disp('TRAINING');
-disp('=====================================');
-script
-disp('=====================================');
-disp('Generating X and Y Matrices for 5 fold testing');
-disp('=====================================');
-data_generator
-disp('Training matrices written to mat files');
-disp('=====================================');
-disp('Validating');
-disp('=====================================');
-scriptVal
-disp('=====================================');
-disp('Generating X and Y Matrices for Validating');
-disp('=====================================');
-data_generatorVal
+% disp('=====================================');
+% disp('TRAINING');
+% disp('=====================================');
+% script
+% disp('=====================================');
+% disp('Generating X and Y Matrices for 5 fold testing');
+% disp('=====================================');
+% data_generator
+% disp('Training matrices written to mat files');
+% disp('=====================================');
+% disp('Validating');
+% disp('=====================================');
+% scriptVal
+% disp('=====================================');
+% disp('Generating X and Y Matrices for Validating');
+% disp('=====================================');
+% data_generatorVal
 load('../dataValOutput/input.mat');
 disp('=====================================');
 disp('Searching For gamma');
@@ -33,7 +33,7 @@ for i=-5:15
     c = 2^i;
     for j = -15:3
         gamma = 2^j;
-        options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
+        options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
         gaus = svmtrain(class,X,options);
         [~,acc,~] = svmpredict(class,X,gaus);
         if acc > maxac
@@ -53,7 +53,7 @@ for i=1:length(crange)
     c = 2^crange(i);
     for j = 1:length(gammarange)
         gamma = 2^gammarange(j);
-        options = sprintf('-s 0 -t 2 -c %f -g %f', c, gamma);
+        options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
         gaus = svmtrain(class,X,options);
         [~,acc,~] = svmpredict(class,X,gaus);
         if acc > maxac
