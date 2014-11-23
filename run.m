@@ -1,12 +1,12 @@
-% disp('=====================================');
-% disp('TRAINING');
-% disp('=====================================');
-% script
-% disp('=====================================');
-% disp('=====================================');
-% disp('Validating');
-% disp('=====================================');
-% scriptVal
+disp('=====================================');
+disp('TRAINING');
+disp('=====================================');
+script
+disp('=====================================');
+disp('=====================================');
+disp('Validating');
+disp('=====================================');
+scriptVal
 disp('Generating X and Y Matrices for 5 fold testing');
 disp('=====================================');
 data_generator
@@ -46,9 +46,6 @@ end
 disp('=====================================');
 disp('Fine grained search for gamma');
 disp('=====================================');
-fprintf('Optimal c is %d, Optimal gamma is %d, Max accuracy is %f',cmax, gammamax, maxac);
-save('coarse.mat', 'gammamax', 'cmax', 'maxac');
-disp('=====================================');
 %fine grained search
 crange = cmax-0.5:0.01:cmax+0.5;
 gammarange = gammamax-0.5:0.01:gammamax+0.5;
@@ -77,38 +74,45 @@ save ('model.mat','gaus');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% load('model.mat');
-% disp('=====================================');
-% disp('Starting 5 Fold Testing');
-% load('../dataOutput/input.mat');
-% disp('=====================================');
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % Yahan mera code aayega!
-% perm = randperm(size(X,1));
-% X = X(perm,:);
-% class = class(perm);
-% acc = zeros(1:5);
-% for j=1:5
-%     
-%    %Add code to randomize X
-%    
-%    testLower = (j-1)*size(X,1)/5 +1;
-%    testUpper = (j)*size(X,1)/5;
-%    
-%    trainX = zeros(size(X,1) - size(X,1)/5,size(X,2));
-%    trainClass = zeros(size(X,1) - size(X,1)/5,1);
-%    trainX(1:testLower - 1,:) = X(1:testLower -1,:);
-%    trainX(testLower:end,:) = X(testUpper+1:end,:);
-%    trainClass(1:testLower - 1) = class(1:testLower -1);
-%    trainClass(testLower:end) = class(testUpper+1:end);
-%    
-%    testX = X(testLower:testUpper,:);
-%    testClass = class(testLower:testUpper);
-%    [~, accuracy, ~] = svmpredict(testClass,testX,gaus);
-%    acc(j) = accuracy(1);
-% end
-
-%svmpredict(class,X,linear);
-%svmpredict(class,X,gaus);
+load('model.mat');
+disp('=====================================');
+disp('Starting 5 Fold Testing');
+load('../dataOutput/input.mat');
+disp('=====================================');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+perm = randperm(size(X,1));
+X = X(perm,:);
+class = class(perm);
+acc = zeros(1:5);
+counts = zeros(5,4);
+for j=1:5
+    
+   %Add code to randomize X
+   
+   testLower = (j-1)*size(X,1)/5 +1;
+   testUpper = (j)*size(X,1)/5;
+   
+   trainX = zeros(size(X,1) - size(X,1)/5,size(X,2));
+   trainClass = zeros(size(X,1) - size(X,1)/5,1);
+   trainX(1:testLower - 1,:) = X(1:testLower -1,:);
+   trainX(testLower:end,:) = X(testUpper+1:end,:);
+   trainClass(1:testLower - 1) = class(1:testLower -1);
+   trainClass(testLower:end) = class(testUpper+1:end);
+   
+   testX = X(testLower:testUpper,:);
+   testClass = class(testLower:testUpper);
+   [prediction, accuracy, ~] = svmpredict(testClass,testX,gaus);
+   acc(j) = accuracy(1);
+   for i=1:length(testClass)
+       if testClass(i)==1 && prediction(i)==1 %TP
+           counts(j,1) = counts(j,1) + 1;
+       elseif testClass(i)==1 && prediction(i)==0 %FN
+           counts(j,2) = counts(j,2) + 1;
+       elseif testClass(i)==0 && prediction(i)==1 %FP
+           counts(j,3) = counts(j,3) + 1;
+       elseif testClass(i)==0 && prediction(i)==0 %TN
+           counts(j,4) = counts(j,4) + 1;
+       end
+   end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
