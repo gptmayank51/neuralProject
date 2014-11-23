@@ -1,3 +1,6 @@
+if exist('../dataOutput/input.mat', 'file')==2
+  delete('../dataOutput/input.mat');
+end
 clear;
 folders = dir('../dataOutput/');
 tChannels = 0;
