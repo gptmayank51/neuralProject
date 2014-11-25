@@ -1,23 +1,19 @@
-if exist('../dataTestOutput/input.mat', 'file')==2
-  delete('../dataTestOutput/input.mat');
+if (isequal(exist('../MatFiles','dir'),7))
+    rmdir('../MatFiles','s');
 end
+mkdir('../MatFiles');
 clear;
 folders = dir('../dataTestOutput/');
-tChannels = 0;
-totFiles=0;
 for i=3:size(folders,1)
     tempC = sprintf('../dataTestOutput/%s/channel.mat',folders(i).name);
     load(tempC);
-    totFiles = totFiles + length(cLength);
-    tChannels = sum(cLength) + tChannels;
+    totFiles = length(cLength);
     clear cLength;
-end
-tfread = sprintf('Total no of training examples is %d', totFiles);
-disp(tfread);
-X = zeros(totFiles,21);
-class = zeros(totFiles,1);
-index = 1;
-for i=3:size(folders,1)
+    tfread = sprintf('Total no of training examples in folder %s is %d',folders(i).name, totFiles);
+    disp(tfread);
+    X = zeros(totFiles,21);
+    class = zeros(totFiles,1);
+    index = 1;
     s = sprintf('../dataTestOutput/%s/',folders(i).name);
     files = dir(s);
     for j=3:size(files,1)
@@ -30,5 +26,6 @@ for i=3:size(folders,1)
            index = index+1;
        end
     end
+    optFile = sprintf('../MatFiles/%s.mat',folders(i).name);
+    save(optFile,'X','class');
 end
-save('../dataTestOutput/input.mat','X','class');

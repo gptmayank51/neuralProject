@@ -20,57 +20,72 @@ disp('=====================================');
 disp('Searching For gamma');
 disp('=====================================');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Enter Your code here bhale!
-% X contains feature vectors
-% class contains its classes
-X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
-%coarse grained search for c and gamma
-addpath('C:\Users\seizure-detection\Desktop\nn\libsvm-3.20\libsvm-3.20\matlab');
-maxac = 0;
-gammamax = 0;
-cmax = 0;
-for i=-5:15
-    c = 2^i;
-    for j = -25:3
-        gamma = 2^j;
-        options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
-        gaus = svmtrain(class,X,options);
-        [~,acc,~] = svmpredict(class,X,gaus);
-        if acc(1) > maxac(1)
-            maxac = acc;
-            gammamax = j;
-            cmax = i;
-        end
-    end 
-end
-disp('=====================================');
-disp('Fine grained search for gamma');
-disp('=====================================');
-%fine grained search
-crange = cmax-0.5:0.01:cmax+0.5;
-gammarange = gammamax-0.5:0.01:gammamax+0.5;
-maxac = 0;
-gammamax = 0;
-cmax = 0;
-for i=1:length(crange)
-    c = 2^crange(i);
-    for j = 1:length(gammarange)
-        gamma = 2^gammarange(j);
-        options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
-        gaus = svmtrain(class,X,options);
-        [~,acc,~] = svmpredict(class,X,gaus);
-        if acc(1) > maxac(1)
-            maxac = acc;
-            gammamax = gamma;
-            cmax = c;
-        end
-    end 
+
+for opt=1:8
+    valSet = mod(opt+5,8)+1;
+    testSet = mod(opt+6,8)+1;
+    valMat = sprintf('../MatFiles/Patient_%dOutput',valSet);
+    testMat = sprintf('../MatFiles/Patient_%dOutput',testSet);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%% VALIDATION %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    load(valMat);
+    % X contains feature vectors
+    % class contains its classes
+    X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
+    %coarse grained search for c and gamma
+    addpath('C:\Users\seizure-detection\Desktop\nn\libsvm-3.20\libsvm-3.20\matlab');
+    maxac = 0;
+    gammamax = 0;
+    cmax = 0;
+    for i=-5:15
+        c = 2^i;
+        for j = -25:3
+            gamma = 2^j;
+            options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
+            gaus = svmtrain(class,X,options);
+            [~,acc,~] = svmpredict(class,X,gaus);
+            if acc(1) > maxac(1)
+                maxac = acc;
+                gammamax = j;
+                cmax = i;
+            end
+        end 
+    end
+    disp('=====================================');
+    disp('Fine grained search for gamma');
+    disp('=====================================');
+    %fine grained search
+    crange = cmax-0.5:0.01:cmax+0.5;
+    gammarange = gammamax-0.5:0.01:gammamax+0.5;
+    maxac = 0;
+    gammamax = 0;
+    cmax = 0;
+    for i=1:length(crange)
+        c = 2^crange(i);
+        for j = 1:length(gammarange)
+            gamma = 2^gammarange(j);
+            options = sprintf('-q -s 0 -t 2 -c %f -g %f', c, gamma);
+            gaus = svmtrain(class,X,options);
+            [~,acc,~] = svmpredict(class,X,gaus);
+            if acc(1) > maxac(1)
+                maxac = acc;
+                gammamax = gamma;
+                cmax = c;
+            end
+        end 
+    end
+
+    options = sprintf('-s 0 -t 2 -c %f -g %f', cmax, gammamax);
+    %linear = svmtrain(class,X,'-s 0 -t 0 -c 1');
+    gaus = svmtrain(class,X,options);
+    save ('model.mat','gaus');
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%% Testing %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
 end
 
-options = sprintf('-s 0 -t 2 -c %f -g %f', cmax, gammamax);
-%linear = svmtrain(class,X,'-s 0 -t 0 -c 1');
-gaus = svmtrain(class,X,options);
-save ('model.mat','gaus');
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
