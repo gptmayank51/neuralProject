@@ -1,35 +1,53 @@
-disp('=====================================');
-disp('TRAINING');
-disp('=====================================');
-script
-disp('=====================================');
-disp('=====================================');
-disp('Validating');
-disp('=====================================');
-scriptVal
-disp('Generating X and Y Matrices for 5 fold testing');
-disp('=====================================');
-data_generator
-disp('Training matrices written to mat files');
-disp('=====================================');
-disp('Generating X and Y Matrices for Validating');
-disp('=====================================');
-data_generatorVal
-load('../dataValOutput/input.mat');
-disp('=====================================');
-disp('Searching For gamma');
-disp('=====================================');
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% disp('=====================================');
+% disp('TRAINING');
+% disp('=====================================');
+% script
+% disp('=====================================');
+% disp('=====================================');
+% disp('Validating');
+% disp('=====================================');
+% scriptVal
+% disp('Generating X and Y Matrices for 5 fold testing');
+% disp('=====================================');
+% data_generator
+% disp('Training matrices written to mat files');
+% 
+% data_generatorVal
+% load('../dataValOutput/input.mat');
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for opt=1:8
-    valSet = mod(opt+5,8)+1;
-    testSet = mod(opt+6,8)+1;
-    valMat = sprintf('../MatFiles/Patient_%dOutput',valSet);
-    testMat = sprintf('../MatFiles/Patient_%dOutput',testSet);
-    
+testSet = -1;
+valSet = -1;
+countP = 8;
+acc = zeros(1:countP);
+counts = zeros(countP,4);
+for opt = 1:countP
+    valSet = mod(i+5,countP)+1;
+    testSet = mod(i+6,countP)+1;
+    disp('=====================================');
+    fprintf('Generating X and Y Matrices for Training, Iteration no %d\n',opt);
+    disp('=====================================');
+    trainX = [];
+    trainClass = [];
+    for i=1:countP        
+        if (i ~= valSet && i ~= testSet)
+           file = sprintf('../MatFiles/Patient_%dOutput.mat',i);
+           load(file);
+           trainX =  [trainX ; X];
+           trainClass = [trainClass ; class];
+           clear X class
+        end
+    end
+
+    disp('=====================================');
+    disp('Searching For gamma');
+    disp('=====================================');
+
     %%%%%%%%%%%%%%%%%%%%%%%%%% VALIDATION %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+    clear X class
+    valMat = sprintf('../MatFiles/Patient_%dOutput.mat',valSet);
     load(valMat);
+
     % X contains feature vectors
     % class contains its classes
     X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
@@ -76,58 +94,39 @@ for opt=1:8
         end 
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%% TRAINING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     options = sprintf('-s 0 -t 2 -c %f -g %f', cmax, gammamax);
     %linear = svmtrain(class,X,'-s 0 -t 0 -c 1');
-    gaus = svmtrain(class,X,options);
+    gaus = svmtrain(trainClass,trainX,options);
     save ('model.mat','gaus');
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%% TESTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    clear X class
+    testMat = sprintf('../MatFiles/Patient_%dOutput.mat',testSet);
+
+    load('model.mat');
+    disp('=====================================');
+    disp('Starting Testing');
+    disp('=====================================');
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%% Testing %%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-load('model.mat');
-disp('=====================================');
-disp('Starting 5 Fold Testing');
-load('../dataOutput/input.mat');
-disp('=====================================');
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-perm = randperm(size(X,1));
-X = X(perm,:);
-class = class(perm);
-acc = zeros(1:5);
-counts = zeros(5,4);
-for j=1:5
-    
-   %Add code to randomize X
-   
-   testLower = (j-1)*size(X,1)/5 +1;
-   testUpper = (j)*size(X,1)/5;
-   
-   trainX = zeros(size(X,1) - size(X,1)/5,size(X,2));
-   trainClass = zeros(size(X,1) - size(X,1)/5,1);
-   trainX(1:testLower - 1,:) = X(1:testLower -1,:);
-   trainX(testLower:end,:) = X(testUpper+1:end,:);
-   trainClass(1:testLower - 1) = class(1:testLower -1);
-   trainClass(testLower:end) = class(testUpper+1:end);
-   
-   testX = X(testLower:testUpper,:);
-   testClass = class(testLower:testUpper);
-   [prediction, accuracy, ~] = svmpredict(testClass,testX,gaus);
-   acc(j) = accuracy(1);
-   for i=1:length(testClass)
+    load(testMat);
+    % X contains feature vectors
+    % class contains its classes
+    [prediction, accuracy, ~] = svmpredict(class,X,gaus);
+    acc(opt) = accuracy(1);
+    for i=1:length(testClass)
        if testClass(i)==1 && prediction(i)==1 %TP
-           counts(j,1) = counts(j,1) + 1;
+           counts(opt,1) = counts(opt,1) + 1;
        elseif testClass(i)==1 && prediction(i)==0 %FN
-           counts(j,2) = counts(j,2) + 1;
+           counts(opt,2) = counts(opt,2) + 1;
        elseif testClass(i)==0 && prediction(i)==1 %FP
-           counts(j,3) = counts(j,3) + 1;
+           counts(opt,3) = counts(opt,3) + 1;
        elseif testClass(i)==0 && prediction(i)==0 %TN
-           counts(j,4) = counts(j,4) + 1;
+           counts(opt,4) = counts(opt,4) + 1;
        end
-   end
+    end
+    fprintf('Accuracy reported is %d\n',acc(opt));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('Average accruacy reported is %d\n',mean(acc));
