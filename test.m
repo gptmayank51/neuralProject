@@ -11,6 +11,5 @@ data_generatorTest
 disp('=====================================');
 disp('Running LibSVM on it');
 disp('=====================================');
-run
-% runEqual
+runEqual
 % runMedian
