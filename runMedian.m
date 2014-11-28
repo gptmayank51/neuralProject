@@ -28,6 +28,7 @@ valSet = -1;
 countP = 8;
 accu = zeros(countP,1);
 precision = zeros(countP,1);
+fmeasure = zeros(countP,1);
 recall = zeros(countP,1);
 for opt = 1:countP
     valSet = mod(opt+5,countP)+1;
@@ -46,6 +47,8 @@ for opt = 1:countP
            clear X class
         end
     end
+    
+    trainX = (trainX-ones(length(trainX),1)*mean(trainX))./(ones(length(trainX),1)*std(trainX));
 
     disp('=====================================');
     disp('Searching For gamma');
@@ -76,8 +79,8 @@ for opt = 1:countP
         disp('=====================================');
     end
     temp = find(acc == max(max(acc)));
-    median = temp(floor(length(temp)/2));
-    gammamax = floor(median/16);
+    median = temp(ceil(length(temp)/2));
+    gammamax = ceil(median/16);
     cmax = mod(median,16);
     cmax = cmax - 6;
     gammamax = gammamax - 16;
@@ -102,8 +105,8 @@ for opt = 1:countP
         disp('=====================================');
     end
     temp = find(acc == max(max(acc)));
-    median = temp(floor(length(temp)/2));
-    gammamax = floor(median/11);
+    median = temp(ceil(length(temp)/2));
+    gammamax = ceil(median/11);
     cmax = mod(median,11);
     gamma = 2^gammarange(gammamax);
     c = 2^crange(cmax);
@@ -129,30 +132,34 @@ for opt = 1:countP
     load(testMat);
     % X contains feature vectors
     % class contains its classes
+    X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
     [prediction, accuracy, ~] = svmpredict(class,X,gaus);
     accu(opt) = accuracy(1);
     counts = zeros(4,1);
-    for i=1:length(testClass)
-       if testClass(i)==1 && prediction(i)==1 %TP
+    for i=1:length(class)
+       if class(i)==1 && prediction(i)==1 %TP
            counts(1) = counts(1) + 1;
-       elseif testClass(i)==1 && prediction(i)==-1 %FN
+       elseif class(i)==1 && prediction(i)==-1 %FN
            counts(2) = counts(2) + 1;
-       elseif testClass(i)==-1 && prediction(i)==1 %FP
+       elseif class(i)==-1 && prediction(i)==1 %FP
            counts(3) = counts(3) + 1;
-       elseif testClass(i)==-1 && prediction(i)==-1 %TN
+       elseif class(i)==-1 && prediction(i)==-1 %TN
            counts(4) = counts(4) + 1;
        end
     end
     precision(opt) = counts(1)/(counts(1)+counts(3));
     recall(opt) = counts(1)/(counts(1)+counts(2));
+    fmeasure(opt) = harmmean([recall(opt), precision(opt)]);
     fprintf('Accuracy reported is %d\n',accu(opt));
     fprintf('Precision reported is %d\n',precision(opt));
     fprintf('Recall reported is %d\n',recall(opt));
+    fprintf('F-measure reported is %d\n',fmeasure(opt));
     disp('Count is');
     disp(counts);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf('Average accuracy reported is %d\n',mean(acc));
+fprintf('Average accuracy reported is %d\n',mean(accu));
 fprintf('Average precision reported is %d\n',mean(precision));
 fprintf('Average recall reported is %d\n',mean(recall));
+fprintf('Average f-measure reported is %d\n',mean(fmeasure));
 diary('off');
