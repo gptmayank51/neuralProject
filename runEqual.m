@@ -1,27 +1,11 @@
-% disp('=====================================');
-% disp('TRAINING');
-% disp('=====================================');
-% script
-% disp('=====================================');
-% disp('=====================================');
-% disp('Validating');
-% disp('=====================================');
-% scriptVal
-% disp('Generating X and Y Matrices for 5 fold testing');
-% disp('=====================================');
-% data_generator
-% disp('Training matrices written to mat files');
-% 
-% data_generatorVal
-% load('../dataValOutput/input.mat');
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 clear;
-delete('myTextLogEqual.txt');
+if exist('myTextLogEqual.txt', 'file')==2
+    delete('myTextLogEqual.txt');
+end
 diary('myTextLogEqual.txt');
 disp('=====================================');
 disp('=====================================');
-fprintf('New session started');
+fprintf('New session started\n');
 disp('=====================================');
 disp('=====================================');
 testSet = -1;
