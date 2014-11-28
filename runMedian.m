@@ -26,9 +26,9 @@ disp('=====================================');
 testSet = -1;
 valSet = -1;
 countP = 8;
-accu = zeros(1:countP);
-precision = zeros(1:countP);
-recall = zeros(1:countP);
+accu = zeros(countP,1);
+precision = zeros(countP,1);
+recall = zeros(countP,1);
 for opt = 1:countP
     valSet = mod(opt+5,countP)+1;
     testSet = mod(opt+6,countP)+1;
@@ -77,7 +77,8 @@ for opt = 1:countP
     end
     temp = find(acc == max(max(acc)));
     median = temp(floor(length(temp)/2));
-    [gammamax,cmax] = quorem(median,sym(16));
+    gammamax = floor(median/16);
+    cmax = mod(median,16);
     cmax = cmax - 6;
     gammamax = gammamax - 16;
     disp('=====================================');
@@ -102,7 +103,8 @@ for opt = 1:countP
     end
     temp = find(acc == max(max(acc)));
     median = temp(floor(length(temp)/2));
-    [gammamax,cmax] = quorem(median,sym(11));
+    gammamax = floor(median/11);
+    cmax = mod(median,11);
     gamma = 2^gammarange(gammamax);
     c = 2^crange(cmax);
     disp('=====================================');
