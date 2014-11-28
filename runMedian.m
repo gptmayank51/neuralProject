@@ -1,11 +1,26 @@
+% disp('=====================================');
+% disp('TRAINING');
+% disp('=====================================');
+% script
+% disp('=====================================');
+% disp('=====================================');
+% disp('Validating');
+% disp('=====================================');
+% scriptVal
+% disp('Generating X and Y Matrices for 5 fold testing');
+% disp('=====================================');
+% data_generator
+% disp('Training matrices written to mat files');
+% 
+% data_generatorVal
+% load('../dataValOutput/input.mat');
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear;
-if exist('myTextLogMedian.txt', 'file')==2
-    delete('myTextLogMedian.txt');
-end
+delete('myTextLogMedian.txt');
 diary('myTextLogMedian.txt');
 disp('=====================================');
 disp('=====================================');
-fprintf('New session started\n');
+fprintf('New session started');
 disp('=====================================');
 disp('=====================================');
 testSet = -1;
@@ -66,7 +81,7 @@ for opt = 1:countP
     temp = find(acc == max(max(acc)));
     median = temp(ceil(length(temp)/2));
     gammamax = ceil(median/16);
-    cmax = mod(median,16);
+    cmax = mod(median,16)+1;
     cmax = cmax - 6;
     gammamax = gammamax - 16;
     disp('=====================================');
@@ -91,8 +106,8 @@ for opt = 1:countP
     end
     temp = find(acc == max(max(acc)));
     median = temp(ceil(length(temp)/2));
-    gammamax = ceil(median/11);
-    cmax = mod(median,11);
+    gammamax = ceil(median/6);
+    cmax = mod(median,6)+1;
     gamma = 2^gammarange(gammamax);
     c = 2^crange(cmax);
     disp('=====================================');
