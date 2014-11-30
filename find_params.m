@@ -58,8 +58,11 @@ function [params] = find_params(t)
         [maxVal, index] = max(pxx);
         temp = abs(pxx - (maxVal/2));
         [~,Ind]= sort(temp);
+        % set peak freq
         params(i,1) = index;
+        % set bandwidth
         params(i,3) = maxVal;
+        % set bandwidth
         params(i,2) = abs(Ind(1) - Ind(2));
         % Spectral Edge Frequency - For range 2-20Hz.
         tp = sum(pxx(3:20));
@@ -68,6 +71,7 @@ function [params] = find_params(t)
         while (sum(pxx(3:idx)) > 0.9*tp)
             idx = idx-1;
         end
+        % set spectral freq
         params(i,4) = idx;
         % pband = bandpower(pxx,F,[2 20],'psd');  %LINK  - http://www.mathworks.in/help/signal/ref/bandpower.html#btrddkn-4
         % params(i,5) = pband;
@@ -82,6 +86,7 @@ function [params] = find_params(t)
         params(i,6) = iwmf;
         iwbw = sqrt(sum(psubi.*((iwmf - ivector*df)'*(iwmf - ivector*df)))/sum(psubi));
         params(i,7) = iwbw;
+        % set wavlet energy
         [C,L] = wavedec(t(:,i), 8, 'db4');
         [params(i,8), ~] = wenergy(C, L);
         

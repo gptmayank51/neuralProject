@@ -1,3 +1,9 @@
+% Almost similar to runtest, The only difference being here that this is for the case when we are taking all ictal and interictal examples
+% This is for the case when we are all ictal and interictal examples in "../dataTest"
+% Here the input patient wise files need to be in "../MatFiles" folder
+% Script to run LibSVM by dividing the patient set into train, validation and test set
+% Outputs the Accuracy, F measure, Precison & Recall
+% For other details refer to reuEqual files
 clear;
 if exist('myTextLogMedian.txt', 'file')==2
     delete('myTextLogMedian.txt');

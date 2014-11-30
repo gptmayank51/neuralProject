@@ -1,7 +1,13 @@
+% This is for the case when we are taking equal no of ictal and interictal examples in "../dataTest"
+% Here the input patient wise files need to be in "../MatFilesEqual" folder
+% So you will have to manually update the data_generator scipt to write its output to ../MatFilesEqual instead of ../MatFiles
+% Script to run LibSVM by dividing the patient set into train, validation and test set
+% Outputs the Accuracy, F measure, Precison & Recall
 clear;
 if exist('myTextLogEqual.txt', 'file')==2
     delete('myTextLogEqual.txt');
 end
+% Log the output of matlab into a file
 diary('myTextLogEqual.txt');
 disp('=====================================');
 disp('=====================================');
@@ -11,16 +17,20 @@ disp('=====================================');
 testSet = -1;
 valSet = -1;
 countP = 8;
+% Variable to store results like accuracy, F measure, recall, precision etc.
 accu = zeros(countP,1);
 precision = zeros(countP,1);
 fmeasure = zeros(countP,1);
 recall = zeros(countP,1);
+% Iterate over entire data taking one patient as test set (given by testSet), one as validation set (given by valSet)
+% and the remaining as training set
 for opt = 1:countP
     valSet = mod(opt+5,countP)+1;
     testSet = mod(opt+6,countP)+1;
     disp('=====================================');
     fprintf('Generating X and Y Matrices for Training, Iteration no %d\n',opt);
     disp('=====================================');
+    % Populate the training set
     trainX = [];
     trainClass = [];
     for i=1:countP        
@@ -32,7 +42,7 @@ for opt = 1:countP
            clear X class
         end
     end
-    
+    % Normailze the data
     trainX = (trainX-ones(length(trainX),1)*mean(trainX))./(ones(length(trainX),1)*std(trainX));
 
     disp('=====================================');
@@ -42,12 +52,14 @@ for opt = 1:countP
     %%%%%%%%%%%%%%%%%%%%%%%%%% VALIDATION %%%%%%%%%%%%%%%%%%%%%%%%%%%
     clear X class
     valMat = sprintf('../MatFilesEqual/Patient_%dOutput.mat',valSet);
+    % Load the patient data that will be used for validation
     load(valMat);
 
     % X contains feature vectors
     % class contains its classes
     X = (X - (ones(size(X,1),1)*mean(X)))./(ones(size(X,1),1)*std(X)); %normalised features
     %coarse grained search for c and gamma
+    % Iterate over c & gamma and find out the one which gives the best result
     addpath('C:\Users\seizure-detection\Desktop\nn\libsvm-3.20\libsvm-3.20\matlab');
     maxac = 0;
     gammamax = 0;
@@ -73,6 +85,8 @@ for opt = 1:countP
     disp('Fine grained search for gamma');
     disp('=====================================');
     %fine grained search
+    % Using the best value of c & gamma obtained in the previous one, use the range of +- 0.5 from the true value
+    % and do a fine grained search to find the best value of c and gammma
     crange = cmax-0.5:0.2:cmax+0.5;
     gammarange = gammamax-0.5:0.2:gammamax+0.5;
     maxac = 0;
@@ -97,7 +111,7 @@ for opt = 1:countP
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%% TRAINING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    % Using the best value of c &  gamma, generate a model to be used on the training set
     disp('=====================================');
     fprintf('Optimal Gamma is %d, C is %d, Training Starting now!!\n',gammamax,cmax);
     disp('=====================================');
@@ -120,6 +134,7 @@ for opt = 1:countP
 
     % X contains feature vectors
     % class contains its classes
+    % Calculate accuracy and other measures
     [prediction, accuracy, ~] = svmpredict(class,X,gaus);
     accu(opt) = accuracy(1);
     counts = zeros(4,1);

@@ -1,3 +1,4 @@
+
 if exist('../dataOutput/input.mat', 'file')==2
   delete('../dataOutput/input.mat');
 end
