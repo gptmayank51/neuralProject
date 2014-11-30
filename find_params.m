@@ -32,13 +32,13 @@ function [params] = find_params(t)
         for j=1:length(t)
             params(i,11) = params(i,11) + t(j,i)*t(j,i);
             if j~=(length(t))
-                der(j,i) = t(j+1,i)-t(j,i);
+                der(j,i) = t(j+1,i)-t(j,i); %first derivative of the time domain signal
                 params(i,9) = params(i,9) + abs(der(j,i));
                 params(i,12) = params(i,12) + (abs(der(j,i))<EPSILON);
                 params(i,13) = params(i,13) + (t(j+1,i)*t(j,i) < 0);
                 if j~=1
                     params(i,10) = params(i,10) + (t(j,i)*t(j,i) - t(j-1,i)*t(j+1,i));
-                    dbder(j-1,i) = der(j,i)-der(j-1,i);
+                    dbder(j-1,i) = der(j,i)-der(j-1,i); %second derivative of the time domain signal
                 end
             end
         end
@@ -47,7 +47,7 @@ function [params] = find_params(t)
         params(i,14) = var(t(:,i));
         params(i,15) = std(der(:,i))/std(t(:,i));
         params(i,16) = (std(dbder(:,i))/std(der(:,i)))/(std(der(:,i))/std(t(:,i)));
-        m = ar(t(1:length(t)/2,i),7);
+        m = ar(t(1:length(t)/2,i),7); %Auto regressive model fit of the EEG signal
         [~, params(i,17)] = compare(t(length(t)/2+1:end,i),m);
         
         %frequency domain features
@@ -91,13 +91,13 @@ function [params] = find_params(t)
         [params(i,8), ~] = wenergy(C, L);
         
         %entropy domain features
-        pfx = pxx(1:30)/sum(pxx(1:30));
-        params(i,18) = (-1/log(30))*sum(pfx.*log(pfx));
-        [~, phx, ~] = kde(t(:,i));
+        pfx = pxx(1:30)/sum(pxx(1:30)); %probability density function calculation
+        params(i,18) = (-1/log(30))*sum(pfx.*log(pfx)); 
+        [~, phx, ~] = kde(t(:,i)); %histogram estimate of probability density function
         reqd = find(phx>0);
         params(i,19) = -sum(phx(reqd).*log(phx(reqd)));
         params(i,20) = ApEn(DE, 0.2*std(t(:,i)), t(:,i));
-        X = zeros(ceil(length(t)/DE),DE);
+        X = zeros(ceil(length(t)/DE),DE); %embedded matrix evaluation
         for j=1:length(X)
             for k=1:DE
                 X(j,k) = t(j+k,i);
