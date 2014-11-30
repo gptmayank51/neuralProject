@@ -3,11 +3,15 @@ folders = dir('../dataTest/');
 if (isequal(exist('../dataTestOutput','dir'),7))
         rmdir('../dataTestOutput','s');
 end
+% Create directory for outputfiles
 mkdir('../dataTestOutput');
 for i=3:size(folders,1)
+    % Iterate over all the patient folders
     s = sprintf('../dataTest/%s', folders(i).name);
     files = dir(s);
+    % channel vector - vector containing info about no of channels in each clip
     cLength = [];
+    % create individual folder for outputs of each patient
     optFolder = sprintf('../dataTestOutput/%sOutput', folders(i).name);
     if (isequal(exist(optFolder,'dir'),7))
         rmdir(optFolder,'s');
@@ -15,8 +19,10 @@ for i=3:size(folders,1)
     mkdir(optFolder);
     for j=3:size(files,1)
         t = sprintf('../dataTest/%s/%s', folders(i).name, files(j).name);
+        % optfile is the output file for a particular patient's particular clip
         optFile = sprintf('%s/%s.mat',optFolder,files(j).name);
         temp = textscan(files(j).name,'%s','delimiter','_');
+        % Read the clip file and store its class based on its file name as ictal or interictal
         if (strcmp(temp{1}{3},'ictal') || strcmp(temp{1}{3},'interictal'))
             name = sprintf('Folder %s, file %s',folders(i).name,files(j).name);
             disp(name);
@@ -26,6 +32,7 @@ for i=3:size(folders,1)
                 Y = -1;
             end
             load(t);
+            % store its channel length in the channel array
             cLength= [cLength ; size(data,1)];
             down = downsample(data',ceil(freq/256)); % downsampled to 250Hz
             input = zeros(size(down));
@@ -36,7 +43,7 @@ for i=3:size(folders,1)
             % fvtool(b,a); %Visualize filter
             % legend(fvt,'lowpass','designfilt')
 
-            % ############## BAND PASS FILTER ################
+            % ############## CHEBY2 BAND PASS FILTER ################
             [A,B,C,D] = cheby2(10,40,[0.5 34]/(length(down)/2)); % 125 is half of sampling frequency
             sos = ss2sos(A,B,C,D);
             % fvt = fvtool(sos,d,'Fs',1500); %Visualize filter
@@ -55,13 +62,17 @@ for i=3:size(folders,1)
             end
 
             clearvars -except filtered optFile Y folders files i optFolder cLength; % all further analysis will take place wrt filtered data
+            % Generate feature vectors. find_params returns 21*channels matrix containing 21 feature for each channel
             parameters = find_params(filtered);
-            features = mean(parameters,1); % For now taking only data of first channel for classification
+            % Use the mean of the features across all the channels
+            features = mean(parameters,1); 
             % For general case do this - 
             % X = (parameters(:))';
+            % save the feature vector and class vetor in a mat file
             save(optFile,'features','Y');
         end
     end
+    % save all the channel info in a mat file
     channelMat = sprintf('%s/channel.mat',optFolder);
     save(channelMat,'cLength');
 end
